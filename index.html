@@ -133,3 +133,38 @@
     <div id="memory-radar">🔍 SEARCHING FOR TEMB'S BRAIN...</div>
 
     <div id="chat-container">
+        <div id="chat-header">🧠 Temb-GPT Ultra</div>
+        
+        <div id="log">
+            <div class="msg bot"><b>Temb:</b> 555! Yo Temsin! I'm ready. Is the bar above Green yet? If not, I'm still "Dumb" lol.</div>
+        </div>
+
+        <div class="input-area">
+            <input type="text" id="userInput" placeholder="Type a message..." onkeypress="if(event.key==='Enter') askTemb()">
+            <button onclick="askTemb()">SEND</button>
+        </div>
+    </div>
+
+    <script>
+        let tembMemory = [];
+
+        async function syncKnowledge() {
+            const radar = document.getElementById('memory-radar');
+            // Try local path first, then absolute path
+            const links = [
+                './knowledge.json?v=' + Date.now(),
+                'https://raw.githubusercontent.com/temsin2135/Temb-AI/main/knowledge.json?v=' + Date.now()
+            ];
+
+            for (let url of links) {
+                try {
+                    const res = await fetch(url);
+                    if (res.ok) {
+                        tembMemory = await res.json();
+                        if (tembMemory.length > 5) {
+                            radar.innerText = `✅ TEMB GENIUS MODE: ${tembMemory.length} FACTS LOADED!`;
+                            radar.style.background = "#22c55e";
+                            return;
+                        }
+                    }
+                } catch
