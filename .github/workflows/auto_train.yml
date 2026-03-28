@@ -1,19 +1,23 @@
 name: Temb Auto-Update
 on:
-  workflow_dispatch: # Allows you to click the button!
   schedule:
     - cron: '0 0 * * *'
+  workflow_dispatch:
+
+# 🚀 This line stops the Node.js 20 warnings!
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
   build:
     runs-on: ubuntu-latest
     permissions:
-      contents: write # 🔑 This is the "Skeleton Key"
+      contents: write # 🧠 Gives Temb the 'Write' permission
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          persist-credentials: true # 🛡️ This keeps the bot logged in
+          token: ${{ secrets.GITHUB_TOKEN }} # 🔑 The ID Card
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -28,7 +32,7 @@ jobs:
           python -c "
           import requests, json
           try:
-              print('📡 Fetching Minecraft Data...')
+              print('📡 Fetching Minecraft 1.21 Data...')
               url = 'https://raw.githubusercontent.com/PrismarineJS/minecraft-data/master/data/pc/1.21/items.json'
               items = requests.get(url).json()
               knowledge = [f'The item {i[\"displayName\"]} has the ID {i[\"name\"]}.' for i in items[:150]]
@@ -46,4 +50,5 @@ jobs:
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add knowledge.json
           git commit -m "Auto-Update: Temb learned Minecraft Wiki! 555" || echo "No changes"
-          git push origin main
+          # 🛡️ THE SECRET FIX: This pushes using the internal token directly
+          git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }} main
