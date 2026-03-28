@@ -1,22 +1,20 @@
 name: Temb Auto-Update
 
 on:
+  workflow_dispatch:
   schedule:
     - cron: '0 0 * * *'
-  workflow_dispatch:
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
 
 jobs:
   build:
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      contents: write # 🚀 Double-checking permissions here!
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -26,43 +24,41 @@ jobs:
       - name: Install dependencies
         run: pip install requests
 
-      - name: Run Scraper
+      - name: Run Scraper and Force Save
         run: |
           python -c "
           import requests, json
-          knowledge = []
+          # 1. Start with a solid list of facts
+          knowledge = [
+              'Temsin is a Grade 8 student at Samsen School in M.2/8.',
+              'Temsin is a technical Minecraft and Redstone expert.',
+              'The mace is a powerful 1.21 weapon.',
+              'Heavy Core is used to craft the Mace.'
+          ]
+          
           try:
-              # 📡 Try to get 1.21 items
-              url = 'https://raw.githubusercontent.com/PrismarineJS/minecraft-data/master/data/pc/1.21/items.json'
-              res = requests.get(url, timeout=10)
+              # 2. Try to grab the huge Minecraft list
+              print('📡 Fetching Minecraft 1.21 items...')
+              res = requests.get('https://raw.githubusercontent.com/PrismarineJS/minecraft-data/master/data/pc/1.21/items.json', timeout=10)
               if res.ok:
                   items = res.json()
-                  knowledge = [f'The item {i[\"displayName\"]} has the ID {i[\"name\"]}.' for i in items[:200]]
-                  print(f'✅ Found {len(knowledge)} items from Web!')
+                  web_facts = [f'The item {i[\"displayName\"]} has the ID {i[\"name\"]}.' for i in items[:250]]
+                  knowledge.extend(web_facts)
+                  print(f'✅ Successfully added {len(web_facts)} items from the web!')
           except Exception as e:
-              print(f'⚠️ Web search failed, using Backup Brain...')
-          
-          # 🧠 Backup Brain (Always works!)
-          if len(knowledge) < 5:
-              knowledge = [
-                  'The item Mace has the ID mace.',
-                  'The item Heavy Core has the ID heavy_core.',
-                  'The item Breeze Rod has the ID breeze_rod.',
-                  'The item Trial Key has the ID trial_key.'
-              ]
-          
-          # 🎓 Personal Info
-          knowledge.append('Temsin is a Grade 8 student at Samsen School in M.2/8.')
-          knowledge.append('Temsin is a Redstone Engineering expert.')
+              print(f'⚠️ Web fetch failed, but keeping personal facts!')
 
+          # 3. FORCE write the file
           with open('knowledge.json', 'w') as f:
               json.dump(knowledge, f)
+          print('💾 knowledge.json has been written locally.')
           "
 
-      - name: Commit and Push
+      - name: Push to GitHub
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
           git add knowledge.json
-          git commit -m "Temb learned new stuff! 555" || echo "No changes"
-          git push
+          # 🚨 The '|| true' part makes sure it doesn't crash if nothing changed
+          git commit -m "Temb learned 250+ Minecraft items! 555" || true
+          git push origin main
