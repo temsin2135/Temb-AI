@@ -1,0 +1,41 @@
+name: Temb Auto-Update
+on:
+  schedule:
+    - cron: '0 0 * * *' # Runs every night at midnight
+  workflow_dispatch: # This adds the "Manual Run" button!
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # Gives Temb permission to grow
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Run Scraper
+        run: |
+          echo "import requests, json
+          res = requests.get('https://raw.githubusercontent.com/PrismarineJS/minecraft-data/master/data/pc/1.21/items.json')
+          items = res.json()
+          knowledge = [f'The item {i[\"displayName\"]} has the ID {i[\"name\"]}.' for i in items[:200]]
+          knowledge.append('Temsin is a Grade 8 student at Samsen School.')
+          with open('knowledge.json', 'w') as f:
+              json.dump(knowledge, f)" > scrape.py
+          python scrape.py
+
+      - name: Commit and Push
+        run: |
+          git config --global user.name "Temb-Bot"
+          git config --global user.email "bot@temb.ai"
+          git add knowledge.json
+          git commit -m "Auto-Update: Temb learned 200 Minecraft items! 555" || exit 0
+          git push
