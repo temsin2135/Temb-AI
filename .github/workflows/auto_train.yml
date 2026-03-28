@@ -24,27 +24,37 @@ jobs:
       - name: Install dependencies
         run: pip install requests
 
-      - name: Run Scraper and Force Save
+      - name: Run Hyper-Scraper
         run: |
           python -c "
-          import requests, json
+          import requests, json, time
           knowledge = []
-          try:
-              print('📡 Requesting 1.21 Database...')
-              headers = {'User-Agent': 'Mozilla/5.0'}
-              url = 'https://raw.githubusercontent.com/PrismarineJS/minecraft-data/master/data/pc/1.21/items.json'
-              res = requests.get(url, headers=headers, timeout=15)
-              if res.ok:
-                  items = res.json()
-                  knowledge = [f'The item {i[\"displayName\"]} has the ID {i[\"name\"]}.' for i in items[:250]]
-                  print(f'✅ Learned {len(knowledge)} items!')
-          except Exception as e:
-              print(f'⚠️ Web fetch failed: {e}')
+          # 📡 Try multiple sources for 1.21 data
+          urls = [
+              'https://raw.githubusercontent.com/PrismarineJS/minecraft-data/master/data/pc/1.21/items.json',
+              'https://github.com/PrismarineJS/minecraft-data/raw/master/data/pc/1.21/items.json'
+          ]
+          
+          for url in urls:
+              try:
+                  print(f'📡 Attempting sync with: {url}')
+                  headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
+                  res = requests.get(url, headers=headers, timeout=20)
+                  if res.ok:
+                      items = res.json()
+                      knowledge = [f'The item {i[\"displayName\"]} has the ID {i[\"name\"]}.' for i in items[:250]]
+                      print(f'✅ SUCCESS: Learned {len(knowledge)} items!')
+                      break
+              except Exception as e:
+                  print(f'❌ Link failed, trying next... Error: {e}')
+                  time.sleep(2)
 
+          # 🧠 Always add the Samsen Logic
           personal_facts = [
               'Temsin is a Grade 8 student at Samsen School in M.2/8.',
               'Temsin is a technical Minecraft and Redstone Engineering expert.',
               'Temsin uses the name LagSpike6728 in Roblox.',
+              'The mace is a powerful 1.21 weapon crafted with a Heavy Core and Breeze Rod.',
               'Temb is Temsin\'s personal AI assistant for Samsen projects.'
           ]
           knowledge.extend(personal_facts)
@@ -58,5 +68,5 @@ jobs:
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
           git add knowledge.json
-          git commit -m "Temb learned 250+ Minecraft items! 555" || true
+          git commit -m "Temb Mega-Brain Update! 555" || true
           git push origin main
