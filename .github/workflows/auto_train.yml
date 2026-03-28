@@ -4,16 +4,21 @@ on:
     - cron: '0 0 * * *'
   workflow_dispatch:
 
+# 🚀 THIS LINE STOPS THE NODE.JS 20 WARNINGS!
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   build:
     runs-on: ubuntu-latest
     permissions:
-      contents: write # Essential for 2026 security
+      contents: write # 🧠 Gives Temb the 'Write' brain
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          persist-credentials: false # We will handle the token manually
+          # Use the built-in secret token to authenticate
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -28,7 +33,7 @@ jobs:
           python -c "
           import requests, json
           try:
-              print('📡 Downloading Minecraft Data...')
+              print('📡 Fetching Minecraft Data...')
               url = 'https://raw.githubusercontent.com/PrismarineJS/minecraft-data/master/data/pc/1.21/items.json'
               items = requests.get(url).json()
               knowledge = [f'The item {i[\"displayName\"]} has the ID {i[\"name\"]}.' for i in items[:100]]
@@ -43,8 +48,7 @@ jobs:
       - name: Commit and Push
         run: |
           git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add knowledge.json
-          git commit -m "Auto-Update: Temb learned Minecraft Wiki! 555" || echo "No changes to commit"
-          # This line uses your secret token to bypass Error 128
-          git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }} main
+          # Only commit if there are changes (prevents the Error 1)
+          git diff --quiet && git diff --staged --quiet || (git commit -m "Auto-Update: Temb learned Minecraft Wiki! 555" && git push)
