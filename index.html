@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Temb AI | Samsen Edition</title>
     <style>
-        /* 🎨 HACKER THEME COLORS */
         :root {
             --bg: #020617;
             --card: #1e293b;
@@ -27,7 +26,6 @@
             min-height: 100vh;
         }
 
-        /* 🚨 THE GIANT MEMORY BAR (YOU CAN'T MISS THIS!) */
         #memory-radar {
             width: 90%;
             max-width: 600px;
@@ -37,13 +35,12 @@
             text-align: center;
             font-weight: bold;
             font-size: 1.2rem;
-            background: var(--error); /* Starts Red */
+            background: var(--error);
             border: 4px solid #ffffff;
             box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
             transition: all 0.5s ease;
         }
 
-        /* 💬 THE CHAT BOX */
         #chat-container {
             width: 90%;
             max-width: 600px;
@@ -127,7 +124,6 @@
 
         button:hover { background: #2563eb; transform: scale(1.05); }
 
-        /* Scrollbar Style */
         #log::-webkit-scrollbar { width: 6px; }
         #log::-webkit-scrollbar-thumb { background: #475569; border-radius: 10px; }
     </style>
@@ -137,86 +133,3 @@
     <div id="memory-radar">🔍 SEARCHING FOR TEMB'S BRAIN...</div>
 
     <div id="chat-container">
-        <div id="chat-header">🧠 Temb-GPT Ultra</div>
-        
-        <div id="log">
-            <div class="msg bot"><b>Temb:</b> 555! Yo Temsin! I'm ready. Is the bar above Green yet? If not, I'm still "Dumb" lol.</div>
-        </div>
-
-        <div class="input-area">
-            <input type="text" id="userInput" placeholder="Type a message..." onkeypress="if(event.key==='Enter') askTemb()">
-            <button onclick="askTemb()">SEND</button>
-        </div>
-    </div>
-
-    <script>
-        let tembMemory = [];
-
-        // 🚀 FETCH KNOWLEDGE
-        async function syncKnowledge() {
-            const radar = document.getElementById('memory-radar');
-            try {
-                // !!! CHANGE THIS TO YOUR ACTUAL GITHUB USERNAME !!!
-                const rawUrl = 'https://raw.githubusercontent.com/temsin2135/Temb-AI/main/knowledge.json?v=' + Date.now();
-                
-                const res = await fetch(rawUrl);
-                if (res.ok) {
-                    tembMemory = await res.json();
-                    if (tembMemory.length > 5) {
-                        radar.innerText = `✅ TEMB GENIUS MODE: ${tembMemory.length} FACTS LOADED!`;
-                        radar.style.background = "#22c55e"; // Success Green
-                    } else {
-                        radar.innerText = "⚠️ MEMORY FILE IS ALMOST EMPTY! RUN ACTION!";
-                        radar.style.background = "#f59e0b"; // Orange
-                    }
-                } else {
-                    radar.innerText = "❌ ERROR: CANNOT FIND KNOWLEDGE.JSON!";
-                    radar.style.background = "#ef4444"; // Red
-                }
-            } catch (e) {
-                radar.innerText = "❌ CONNECTION FAILED!";
-            }
-        }
-
-        syncKnowledge();
-
-        // 🤖 CHAT FUNCTION
-        async function askTemb() {
-            const inputField = document.getElementById('userInput');
-            const input = inputField.value.trim();
-            if (!input) return;
-
-            const log = document.getElementById('log');
-            log.innerHTML += `<div class="msg user"><b>You:</b> ${input}</div>`;
-            inputField.value = "";
-            log.scrollTop = log.scrollHeight;
-
-            try {
-                const facts = tembMemory.length > 0 ? tembMemory.sort(() => 0.5 - Math.random()).slice(0, 5).join(". ") : "Temsin is a student at Samsen School.";
-                
-                const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-                    method: "POST",
-                    headers: {
-                        "Authorization": "Bearer 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",
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({
-                        "model": "google/gemini-2.0-flash-exp:free",
-                        "messages": [
-                            {"role": "system", "content": `You are Temb, witty AI friend for Temsin (Grade 8, Samsen School). Knowledge: ${facts}. Be cool and say 555!`},
-                            {"role": "user", "content": input}
-                        ]
-                    })
-                });
-
-                const data = await response.json();
-                const reply = data.choices[0].message.content;
-                log.innerHTML += `<div class="msg bot"><b>Temb:</b> ${reply}</div>`;
-            } catch (err) {
-                log.innerHTML += `<div class="msg bot" style="color:#ef4444;"><b>Error:</b> Check API key or Internet!</div>`;
-            }
-            log.scrollTop = log.scrollHeight;
-        }
-    </script>
-</body>
-</html>
