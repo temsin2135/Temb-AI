@@ -3,52 +3,61 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Temb AI | Samsen Engineering</title>
+    <title>Temb AI | Samsen Legacy Edition</title>
     <style>
         :root { --bg: #020617; --card: #1e293b; --primary: #3b82f6; --success: #22c55e; --error: #ef4444; --text: #f8fafc; }
         body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; flex-direction: column; align-items: center; padding: 20px; min-height: 100vh; }
+        
         #status-box { width: 90%; max-width: 650px; margin-bottom: 15px; }
-        #memory-radar { padding: 12px; border-radius: 12px 12px 0 0; text-align: center; font-weight: bold; background: var(--error); border: 2px solid #ffffff11; transition: 0.3s; }
+        #memory-radar { padding: 12px; border-radius: 12px 12px 0 0; text-align: center; font-weight: bold; background: var(--error); border: 2px solid #ffffff11; transition: 0.5s; }
         #progress-bar-bg { width: 100%; height: 6px; background: #334155; border-radius: 0 0 12px 12px; overflow: hidden; }
-        #progress-bar { width: 0%; height: 100%; background: var(--primary); transition: width 1s; }
+        #progress-bar { width: 0%; height: 100%; background: var(--primary); transition: width 1.5s; }
+
         #chat-container { width: 90%; max-width: 650px; height: 50vh; background: var(--card); border-radius: 20px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.6); border: 1px solid #334155; }
-        #log { flex-grow: 1; padding: 20px; overflow-y: auto; background: #0f172a; display: flex; flex-direction: column; gap: 10px; }
-        .msg { max-width: 85%; padding: 12px; border-radius: 15px; font-size: 0.95rem; line-height: 1.4; }
+        #log { flex-grow: 1; padding: 20px; overflow-y: auto; background: #0f172a; display: flex; flex-direction: column; gap: 10px; scroll-behavior: smooth; }
+        .msg { max-width: 85%; padding: 12px; border-radius: 15px; font-size: 0.95rem; line-height: 1.4; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
         .user { background: var(--primary); align-self: flex-end; border-bottom-right-radius: 2px; }
         .bot { background: #334155; align-self: flex-start; border: 1px solid #475569; border-bottom-left-radius: 2px; }
+
         .input-area { padding: 15px; background: #1e293b; display: flex; gap: 8px; border-top: 1px solid #334155; }
         input { flex-grow: 1; padding: 12px; border-radius: 10px; border: 1px solid #334155; background: #0f172a; color: white; outline: none; }
         button { background: var(--primary); color: white; border: none; padding: 0 15px; border-radius: 10px; cursor: pointer; font-weight: bold; transition: 0.2s; }
+        button:hover { transform: scale(1.05); filter: brightness(1.2); }
+
         .extra-panel { width: 90%; max-width: 650px; margin-top: 15px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .panel { background: #0f172a; border-radius: 15px; padding: 15px; border: 1px solid #334155; height: 200px; display: flex; flex-direction: column; }
-        #vault-list, #cmd-history { flex-grow: 1; overflow-y: auto; font-family: monospace; font-size: 0.75rem; color: #94a3b8; }
+        .panel h4 { margin: 0 0 10px 0; color: var(--primary); font-size: 0.8rem; letter-spacing: 1px; }
+        #vault-list, #cmd-history { flex-grow: 1; overflow-y: auto; font-family: 'Courier New', monospace; font-size: 0.75rem; color: #64748b; }
     </style>
 </head>
 <body>
 
     <div id="status-box">
-        <div id="memory-radar">🔍 SEARCHING FOR BRAIN...</div>
+        <div id="memory-radar">📡 ATTEMPTING NEURAL SYNC...</div>
         <div id="progress-bar-bg"><div id="progress-bar"></div></div>
     </div>
 
     <div id="chat-container">
-        <div id="log"><div class="msg bot"><b>Temb:</b> 555! Yo Temsin! I'm back online. Try talking to me now คับ!</div></div>
+        <div id="log">
+            <div class="msg bot"><b>Temb:</b> 555! Yo Temsin! All systems updated. Check the Green Bar to see if I'm a genius yet คับ!</div>
+        </div>
         <div class="input-area">
-            <input type="text" id="userInput" placeholder="Talk to Temb..." onkeypress="if(event.key==='Enter') askTemb('chat')">
+            <input type="text" id="userInput" placeholder="Ask anything..." onkeypress="if(event.key==='Enter') askTemb('chat')">
             <button onclick="askTemb('chat')">SEND</button>
         </div>
     </div>
 
     <div class="extra-panel">
         <div class="panel">
-            <h4>📁 VAULT</h4>
-            <div id="vault-list">Syncing...</div>
+            <h4>📁 KNOWLEDGE VAULT</h4>
+            <div id="vault-list">> Waiting for data stream...</div>
         </div>
         <div class="panel">
-            <h4>🎮 CMD</h4>
-            <div id="cmd-history">> System Idle.</div>
+            <h4>🎮 COMMAND CENTER</h4>
+            <div id="cmd-history">> M.2/8 System Online.</div>
             <div style="display:flex; gap:5px; margin-top:10px;">
-                <input type="text" id="cmdInput" style="padding:5px; font-size:0.7rem;" placeholder="Command...">
+                <input type="text" id="cmdInput" style="padding:5px; font-size:0.7rem;" placeholder="Mission command...">
                 <button onclick="askTemb('command')" style="padding:0 10px; font-size:0.7rem;">EXEC</button>
             </div>
         </div>
@@ -56,24 +65,35 @@
 
     <script>
         let tembMemory = [];
-        // 🔑 NEW MASTER KEY APPLIED
+        // 🔑 REPLACEMENT KEY - ACTIVATED
         const API_KEY = "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";
 
         async function syncKnowledge() {
             const radar = document.getElementById('memory-radar');
             const vault = document.getElementById('vault-list');
             const bar = document.getElementById('progress-bar');
+            
             try {
+                // Try to grab your specific Github repo file
                 const res = await fetch('./knowledge.json?v=' + Date.now());
                 if (res.ok) {
                     tembMemory = await res.json();
-                    radar.innerText = `✅ GENIUS MODE: ${tembMemory.length} FACTS`;
-                    radar.style.background = "#22c55e";
-                    bar.style.width = "100%";
-                    vault.innerHTML = tembMemory.map(f => `<div>> ${f}</div>`).join('');
-                }
-            } catch (e) { radar.innerText = "⚠️ OFFLINE MODE"; }
+                    if (tembMemory.length > 10) {
+                        radar.innerText = `✅ GENIUS MODE: ${tembMemory.length} ALGORITHMS`;
+                        radar.style.background = "#22c55e";
+                        bar.style.width = "100%";
+                        vault.innerHTML = tembMemory.map(f => `<div>> ${f}</div>`).join('');
+                    } else { throw new Error("Low data"); }
+                } else { throw new Error("404"); }
+            } catch (e) {
+                radar.innerText = "⚠️ BACKUP BRAIN (LOW FACTS)";
+                radar.style.background = "#f59e0b";
+                bar.style.width = "30%";
+                vault.innerHTML = "<div>> Using local backup... Run Github Action to fix!</div>";
+                tembMemory = ["Temsin is the creator.", "Temsin is a student at Samsen.", "Temb is a Redstone expert."];
+            }
         }
+
         syncKnowledge();
 
         async function askTemb(mode) {
@@ -83,15 +103,20 @@
             if (!input) return;
 
             const log = document.getElementById('log');
-            if (mode === 'chat') log.innerHTML += `<div class="msg user"><b>You:</b> ${input}</div>`;
-            else document.getElementById('cmd-history').innerHTML += `<div>> ${input}</div>`;
+            const cmdLog = document.getElementById('cmd-history');
+
+            if (mode === 'chat') {
+                log.innerHTML += `<div class="msg user"><b>You:</b> ${input}</div>`;
+            } else {
+                cmdLog.innerHTML += `<div>> Running: ${input}</div>`;
+                cmdLog.scrollTop = cmdLog.scrollHeight;
+            }
             
             inputField.value = "";
             log.scrollTop = log.scrollHeight;
 
-            // Loading state
-            const loadId = "load-" + Date.now();
-            log.innerHTML += `<div class="msg bot" id="${loadId}"><i>Temb is thinking... 555</i></div>`;
+            const loadingId = "t-" + Date.now();
+            log.innerHTML += `<div class="msg bot" id="${loadingId}"><i>Thinking... 555</i></div>`;
 
             try {
                 const facts = tembMemory.slice(0, 10).join(". ");
@@ -100,30 +125,16 @@
                     headers: { 
                         "Authorization": `Bearer ${API_KEY}`, 
                         "Content-Type": "application/json",
-                        "HTTP-Referer": window.location.href 
+                        "HTTP-Referer": window.location.href,
+                        "X-Title": "Temb Samsen Edition"
                     },
                     body: JSON.stringify({
                         "model": "google/gemini-2.0-flash-exp:free",
                         "messages": [
-                            {"role": "system", "content": `You are Temb, Grade 8 Samsen. Talk Thai-English. Use 555, คับ, ตึงจัด. Facts: ${facts}`},
-                            {"role": "user", "content": input}
+                            {"role": "system", "content": `You are Temb, a witty Grade 8 student at Samsen School. Expert in Redstone/Minecraft. Talk Thai-English mixed. Use 555, คับ, ตึงจัด. Facts: ${facts}. If user sends a command, be very technical.`},
+                            {"role": "user", "content": mode === 'command' ? `COMMAND MISSION: ${input}` : input}
                         ]
                     })
                 });
 
                 const data = await response.json();
-                document.getElementById(loadId).remove();
-                
-                if (data.choices) {
-                    const reply = data.choices[0].message.content;
-                    log.innerHTML += `<div class="msg bot"><b>Temb:</b> ${reply}</div>`;
-                } else { throw new Error(); }
-            } catch (err) {
-                document.getElementById(loadId).remove();
-                log.innerHTML += `<div class="msg bot" style="color:var(--error);"><b>Error:</b> API limit reached. Try again in 1 min!</div>`;
-            }
-            log.scrollTop = log.scrollHeight;
-        }
-    </script>
-</body>
-</html>
