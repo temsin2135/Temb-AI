@@ -4,7 +4,7 @@ on:
     - cron: '0 0 * * *'
   workflow_dispatch:
 
-# 🚀 This line stops the Node.js 20 warnings!
+# 🚀 2026 FIX: This kills the Node.js 20 warnings!
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
@@ -12,12 +12,12 @@ jobs:
   build:
     runs-on: ubuntu-latest
     permissions:
-      contents: write # 🧠 Gives Temb the 'Write' permission
+      contents: write # 🧠 Essential permission
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          token: ${{ secrets.GITHUB_TOKEN }} # 🔑 The ID Card
+          persist-credentials: false # 🛡️ We will use the token manually
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -32,16 +32,17 @@ jobs:
           python -c "
           import requests, json
           try:
-              print('📡 Fetching Minecraft 1.21 Data...')
+              print('📡 Downloading Minecraft 1.21 items...')
               url = 'https://raw.githubusercontent.com/PrismarineJS/minecraft-data/master/data/pc/1.21/items.json'
               items = requests.get(url).json()
               knowledge = [f'The item {i[\"displayName\"]} has the ID {i[\"name\"]}.' for i in items[:150]]
               knowledge.append('Temsin is a Grade 8 student at Samsen School.')
+              knowledge.append('Temsin is an expert in Redstone and LifeSteal SMP.')
               with open('knowledge.json', 'w') as f:
                   json.dump(knowledge, f)
-              print('✅ knowledge.json created!')
+              print('✅ knowledge.json is ready!')
           except Exception as e:
-              print(f'❌ Error: {e}')
+              print(f'❌ Scraper Error: {e}')
           "
 
       - name: Commit and Push
@@ -50,5 +51,5 @@ jobs:
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add knowledge.json
           git commit -m "Auto-Update: Temb learned Minecraft Wiki! 555" || echo "No changes"
-          # 🛡️ THE SECRET FIX: This pushes using the internal token directly
-          git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }} main
+          # 🔑 THE SECRET KEY: This forces the push using the internal token
+          git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git main
