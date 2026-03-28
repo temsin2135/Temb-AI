@@ -1,68 +1,146 @@
-name: Temb Auto-Update
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Temb AI | Samsen Ultra</title>
+    <style>
+        :root {
+            --bg: #020617;
+            --card: #1e293b;
+            --primary: #3b82f6;
+            --success: #22c55e;
+            --error: #ef4444;
+            --text: #f8fafc;
+        }
 
-on:
-  workflow_dispatch:
-  schedule:
-    - cron: '0 * * * *'  # 🚀 This means: "Run at minute 0 of every hour"
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+        body { 
+            background-color: var(--bg); 
+            color: var(--text); 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            min-height: 100vh;
+        }
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
+        /* 📡 MEMORY RADAR & PROGRESS */
+        #status-box {
+            width: 90%;
+            max-width: 600px;
+            margin-bottom: 20px;
+        }
 
-      - name: Install dependencies
-        run: pip install requests
+        #memory-radar {
+            padding: 15px;
+            border-radius: 12px 12px 0 0;
+            text-align: center;
+            font-weight: bold;
+            background: var(--error);
+            border: 2px solid #ffffff33;
+            transition: all 0.5s ease;
+        }
 
-      - name: Run Scraper and Force Save
-        run: |
-          python -c "
-          import requests, json
-          knowledge = []
-          
-          # 📡 1. Try to grab the HUGE Minecraft list (Java 1.21)
-          try:
-              print('📡 Requesting 1.21 Database...')
-              headers = {'User-Agent': 'Mozilla/5.0'}
-              url = 'https://raw.githubusercontent.com/PrismarineJS/minecraft-data/master/data/pc/1.21/items.json'
-              res = requests.get(url, headers=headers, timeout=15)
-              
-              if res.ok:
-                  items = res.json()
-                  # Grab 250 items to make Temb a genius
-                  knowledge = [f'The item {i[\"displayName\"]} has the ID {i[\"name\"]}.' for i in items[:250]]
-                  print(f'✅ Successfully learned {len(knowledge)} items from the web!')
-          except Exception as e:
-              print(f'⚠️ Web fetch failed: {e}')
+        #progress-container {
+            width: 100%;
+            height: 8px;
+            background: #334155;
+            overflow: hidden;
+            border-bottom-left-radius: 12px;
+            border-bottom-right-radius: 12px;
+        }
 
-          # 🧠 2. Always add the Samsen Legend facts
-          personal_facts = [
-              'Temsin is a Grade 8 student at Samsen School in M.2/8.',
-              'Temsin is a technical Minecraft and Redstone Engineering expert.',
-              'Temsin uses the name LagSpike6728 in Roblox.',
-              'Temb is Temsin\'s personal AI assistant for Samsen projects.'
-          ]
-          knowledge.extend(personal_facts)
+        #progress-bar {
+            width: 0%;
+            height: 100%;
+            background: var(--primary);
+            transition: width 1s ease-in-out;
+        }
 
-          # 💾 3. FORCE write the file
-          with open('knowledge.json', 'w') as f:
-              json.dump(knowledge, f)
-          print(f'💾 knowledge.json written with {len(knowledge)} facts.')
-          "
+        /* 💬 CHAT AREA */
+        #chat-container {
+            width: 90%;
+            max-width: 600px;
+            height: 50vh;
+            background: var(--card);
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border: 1px solid #334155;
+        }
 
-      - name: Push to GitHub
-        run: |
-          git config --global user.name 'github-actions[bot]'
-          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-          git add knowledge.json
-          git commit -m "Temb learned 250+ Minecraft items! 555" || true
-          git push origin main
+        #log {
+            flex-grow: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: #0f172a;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .msg { max-width: 85%; padding: 10px 15px; border-radius: 15px; font-size: 0.95rem; line-height: 1.4; }
+        .user { background: var(--primary); align-self: flex-end; border-bottom-right-radius: 2px; }
+        .bot { background: #334155; align-self: flex-start; border-bottom-left-radius: 2px; }
+
+        .input-area { padding: 15px; background: #1e293b; display: flex; gap: 8px; }
+        input { flex-grow: 1; padding: 12px; border-radius: 8px; border: 1px solid #334155; background: #0f172a; color: white; outline: none; }
+        button { background: var(--primary); color: white; border: none; padding: 0 20px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+
+        /* 📁 KNOWLEDGE VAULT */
+        #vault-container {
+            width: 90%;
+            max-width: 600px;
+            margin-top: 20px;
+            background: #0f172a;
+            border-radius: 12px;
+            padding: 15px;
+            border: 1px solid #334155;
+        }
+
+        #vault-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        #last-updated { font-size: 0.7rem; color: #64748b; }
+        #vault-list { height: 120px; overflow-y: auto; font-family: monospace; font-size: 0.75rem; color: #94a3b8; }
+    </style>
+</head>
+<body>
+
+    <div id="status-box">
+        <div id="memory-radar">🔍 SEARCHING FOR BRAIN...</div>
+        <div id="progress-container"><div id="progress-bar"></div></div>
+    </div>
+
+    <div id="chat-container">
+        <div id="log">
+            <div class="msg bot"><b>Temb:</b> 555! Yo Temsin! Check the Vault below to see what I just learned!</div>
+        </div>
+        <div class="input-area">
+            <input type="text" id="userInput" placeholder="Type to Temb..." onkeypress="if(event.key==='Enter') askTemb()">
+            <button onclick="askTemb()">SEND</button>
+        </div>
+    </div>
+
+    <div id="vault-container">
+        <div id="vault-header">
+            <span style="color: var(--primary); font-weight: bold; font-size: 0.9rem;">📁 KNOWLEDGE VAULT</span>
+            <span id="last-updated">Last Sync: Never</span>
+        </div>
+        <div id="vault-list">> Initializing system...</div>
+    </div>
+
+    <script>
+        let tembMemory = [];
+
+        async function syncKnowledge() {
+            const radar = document.getElementById('memory-radar');
+            const bar = document.getElementById('progress-bar');
+            const vault = document.getElementById('vault-list');
+            const timeTag = document.getElementById('last-updated');
+
+            const links = [
+                './knowledge.json?v=' + Date.now(),
+                '
