@@ -49,5 +49,5 @@ jobs:
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add knowledge.json
           git commit -m "Auto-Update: Temb learned Minecraft Wiki! 555" || echo "No changes to commit"
-          # Using the token directly in the push URL to kill Error 128
-          git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git main
+          # This line forces the push using the internal token
+          git push origin main
