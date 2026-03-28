@@ -1,33 +1,81 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Temb AI Chat</title>
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <title>Temb AI: Ultra</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body { background: #0f172a; color: #f8fafc; font-family: 'Segoe UI', Tahoma, sans-serif; padding: 20px; text-align: center; }
+        #chat-container { max-width: 500px; margin: auto; background: #1e293b; border-radius: 15px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); border: 1px solid #334155; }
+        #log { height: 400px; overflow-y: auto; text-align: left; margin-bottom: 15px; padding-right: 10px; }
+        .msg { margin-bottom: 10px; padding: 8px 12px; border-radius: 10px; line-height: 1.4; }
+        .user { background: #3b82f6; color: white; align-self: flex-end; margin-left: 20%; }
+        .bot { background: #334155; color: #f1f5f9; margin-right: 20%; }
+        .input-area { display: flex; gap: 10px; }
+        input { flex-grow: 1; padding: 12px; border-radius: 8px; border: none; background: #0f172a; color: white; outline: none; }
+        button { padding: 10px 20px; background: #3b82f6; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        button:hover { background: #2563eb; }
+    </style>
 </head>
-<body style="background:#1a1a1a; color:white; text-align:center; font-family:sans-serif;">
-    <h1>🧠 Temb AI (Mobile)</h1>
-    <div id="status">Loading...</div>
-    <div style="background:#333; padding:20px; border-radius:10px; display:inline-block;">
-        <p id="output">Ask me 'who' or 'hi'!</p>
-        <input type="text" id="input" placeholder="Type here...">
-        <button onclick="chat()">Send</button>
+<body>
+    <div id="chat-container">
+        <h2>🧠 Temb-GPT Ultra</h2>
+        <div id="log">
+            <div class="msg bot">Temb: 555! Yo Temsin! I'm officially online. What's the plan for the Orbital Cannon or Samsen homework?</div>
+        </div>
+        <div class="input-area">
+            <input type="text" id="userInput" placeholder="Ask Temb anything..." onkeypress="if(event.key==='Enter') askTemb()">
+            <button onclick="askTemb()">Send</button>
+        </div>
     </div>
+
     <script>
-        let model, dict;
-        async function start() {
-            dict = await (await fetch('tokenizer_data.json')).json();
-            model = await tf.loadLayersModel('model.json');
-            document.getElementById('status').innerText = "✅ ONLINE";
+        async function askTemb() {
+            const inputField = document.getElementById('userInput');
+            const input = inputField.value.trim();
+            if (!input) return;
+
+            const log = document.getElementById('log');
+            log.innerHTML += `<div class="msg user"><b>You:</b> ${input}</div>`;
+            inputField.value = "";
+            log.scrollTop = log.scrollHeight;
+
+            try {
+                // 1. Optional: Try to fetch the knowledge.json from your Colab
+                let facts = "User is Temsin, Grade 8 student at Samsen School.";
+                try {
+                    const memoryRes = await fetch('knowledge.json');
+                    if (memoryRes.ok) {
+                        const memory = await memoryRes.json();
+                        facts += " Recent knowledge: " + memory.slice(-5).join(", ");
+                    }
+                } catch (e) { console.log("No knowledge.json found yet, using default."); }
+
+                // 2. Talk to the Smart Brain (OpenRouter)
+                const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+                    method: "POST",
+                    headers: {
+                        "Authorization": "Bearer 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",
+                        "Content-Type": "application/json",
+                        "HTTP-Referer": "https://github.com/temsin2135/Temb-AI", 
+                        "X-Title": "Temb AI"
+                    },
+                    body: JSON.stringify({
+                        "model": "google/gemini-2.0-flash-exp:free",
+                        "messages": [
+                            {"role": "system", "content": `You are Temb, a witty AI best friend for Temsin (Grade 8, Samsen School). Facts: ${facts}. Be cool, slightly sarcastic/witty, and say 555! like a Thai student.`},
+                            {"role": "user", "content": input}
+                        ]
+                    })
+                });
+
+                const data = await response.json();
+                const reply = data.choices[0].message.content;
+                log.innerHTML += `<div class="msg bot"><b>Temb:</b> ${reply}</div>`;
+            } catch (err) {
+                log.innerHTML += `<div class="msg bot" style="color:red;"><b>Error:</b> Temb's brain is fuzzy. Check your API key!</div>`;
+            }
+            log.scrollTop = log.scrollHeight;
         }
-        async function chat() {
-            let val = document.getElementById('input').value.toLowerCase();
-            let id = dict.wordToId[val];
-            if (id === undefined) { document.getElementById('output').innerText = "Temb: ...?"; return; }
-            let prediction = model.predict(tf.tensor2d([id], [1, 1]));
-            let result = await prediction.argMax(1).data();
-            document.getElementById('output').innerText = "Temb: " + dict.idToWord[result[0]];
-        }
-        start();
     </script>
 </body>
 </html>
