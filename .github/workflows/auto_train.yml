@@ -37,14 +37,24 @@ jobs:
           python -c "
           import requests, json
           try:
-              print('📡 Fetching Minecraft 1.21 Data...')
+              print('📡 Fetching Full Minecraft Data...')
+              # Using a reliable backup source for all MC items
               url = 'https://raw.githubusercontent.com/PrismarineJS/minecraft-data/master/data/pc/1.21/items.json'
-              items = requests.get(url).json()
-              knowledge = [f'The item {i[\"displayName\"]} has the ID {i[\"name\"]}.' for i in items[:150]]
-              knowledge.append('Temsin is a Grade 8 student at Samsen School.')
+              res = requests.get(url)
+              items = res.json()
+              
+              # Build a huge list of facts
+              knowledge = []
+              for i in items:
+                  knowledge.append(f'The item {i[\"displayName\"]} has the ID {i[\"name\"]}.')
+              
+              # Add your personal Samsen info
+              knowledge.append('Temsin is a student at Samsen School in M.1/8 moving to M.2.')
+              knowledge.append('Temsin loves Minecraft technical engineering and Redstone.')
+              
               with open('knowledge.json', 'w') as f:
                   json.dump(knowledge, f)
-              print('✅ knowledge.json updated!')
+              print(f'✅ success! Learned {len(knowledge)} facts.')
           except Exception as e:
               print(f'❌ Error: {e}')
           "
