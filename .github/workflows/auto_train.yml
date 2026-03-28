@@ -1,24 +1,19 @@
 name: Temb Auto-Update
 on:
+  workflow_dispatch: # Allows you to click the button!
   schedule:
     - cron: '0 0 * * *'
-  workflow_dispatch:
-
-# 🚀 STOPS ALL NODE.JS 20 WARNINGS
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
   build:
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      contents: write # 🔑 This is the "Skeleton Key"
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          fetch-depth: 0 # 🔑 Fixes Exit Code 128 by getting the full history
+          persist-credentials: true # 🛡️ This keeps the bot logged in
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -33,20 +28,14 @@ jobs:
           python -c "
           import requests, json
           try:
-              print('📡 Fetching Minecraft 1.21 & Samsen Data...')
+              print('📡 Fetching Minecraft Data...')
               url = 'https://raw.githubusercontent.com/PrismarineJS/minecraft-data/master/data/pc/1.21/items.json'
               items = requests.get(url).json()
-              
-              # 🧠 Temb's Brain - Minecraft + Personal
-              knowledge = [f'The item {i[\"displayName\"]} has the ID {i[\"name\"]}.' for i in items[:250]]
+              knowledge = [f'The item {i[\"displayName\"]} has the ID {i[\"name\"]}.' for i in items[:150]]
               knowledge.append('Temsin is a Grade 8 student at Samsen School.')
-              knowledge.append('Temb is Temsin\'s witty AI best friend.')
-              knowledge.append('Temsin is an expert at Minecraft TNT cannons and LifeSteal SMP.')
-              knowledge.append('Temb uses JavaScript and TensorFlow.js to think.')
-              
               with open('knowledge.json', 'w') as f:
                   json.dump(knowledge, f)
-              print('✅ knowledge.json created with 250+ facts!')
+              print('✅ knowledge.json created!')
           except Exception as e:
               print(f'❌ Error: {e}')
           "
@@ -54,14 +43,7 @@ jobs:
       - name: Commit and Push
         run: |
           git config --global user.name "github-actions[bot]"
-          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add knowledge.json
-          
-          # 🛡️ Anti-Fail: Only push if there is new info
-          if git diff --staged --quiet; then
-            echo "Nothing new to learn today. Temb is already a genius! 555!"
-          else
-            git commit -m "Auto-Update: Temb learned 250 Minecraft items! 555"
-            # 🛡️ Anti-Fail: Force push to main using the token to kill Error 128
-            git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git main
-          fi
+          git commit -m "Auto-Update: Temb learned Minecraft Wiki! 555" || echo "No changes"
+          git push origin main
