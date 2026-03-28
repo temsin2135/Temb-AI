@@ -4,7 +4,7 @@ on:
     - cron: '0 0 * * *'
   workflow_dispatch:
 
-# 🚀 This forces the latest Node.js version to stop those warnings!
+# 🚀 STOPS ALL NODE.JS 20 WARNINGS
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
@@ -12,14 +12,13 @@ jobs:
   build:
     runs-on: ubuntu-latest
     permissions:
-      contents: write 
+      contents: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          # 🔑 THIS FIXES ERROR 128: It tells the bot exactly which branch to use
-          ref: main
           token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0 # 🔑 Fixes Exit Code 128 by getting the full history
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -34,16 +33,22 @@ jobs:
           python -c "
           import requests, json
           try:
-              print('📡 Fetching Minecraft 1.21 Wiki Data...')
+              print('📡 Fetching Minecraft 1.21 & Samsen Data...')
               url = 'https://raw.githubusercontent.com/PrismarineJS/minecraft-data/master/data/pc/1.21/items.json'
               items = requests.get(url).json()
-              knowledge = [f'The item {i[\"displayName\"]} has the ID {i[\"name\"]}.' for i in items[:150]]
+              
+              # 🧠 Temb's Brain - Minecraft + Personal
+              knowledge = [f'The item {i[\"displayName\"]} has the ID {i[\"name\"]}.' for i in items[:250]]
               knowledge.append('Temsin is a Grade 8 student at Samsen School.')
+              knowledge.append('Temb is Temsin\'s witty AI best friend.')
+              knowledge.append('Temsin is an expert at Minecraft TNT cannons and LifeSteal SMP.')
+              knowledge.append('Temb uses JavaScript and TensorFlow.js to think.')
+              
               with open('knowledge.json', 'w') as f:
                   json.dump(knowledge, f)
-              print('✅ knowledge.json is ready!')
+              print('✅ knowledge.json created with 250+ facts!')
           except Exception as e:
-              print(f'❌ Scraper Error: {e}')
+              print(f'❌ Error: {e}')
           "
 
       - name: Commit and Push
@@ -51,10 +56,12 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add knowledge.json
-          # Only push if something actually changed!
+          
+          # 🛡️ Anti-Fail: Only push if there is new info
           if git diff --staged --quiet; then
-            echo "No changes to commit. Temb is already smart! 555!"
+            echo "Nothing new to learn today. Temb is already a genius! 555!"
           else
-            git commit -m "Auto-Update: Temb learned Minecraft Wiki! 555"
-            git push origin main
+            git commit -m "Auto-Update: Temb learned 250 Minecraft items! 555"
+            # 🛡️ Anti-Fail: Force push to main using the token to kill Error 128
+            git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git main
           fi
