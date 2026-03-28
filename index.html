@@ -10,39 +10,42 @@
         
         /* Dashboard Styling */
         #status-box { width: 90%; max-width: 650px; margin-bottom: 15px; }
-        #memory-radar { padding: 12px; border-radius: 12px 12px 0 0; text-align: center; font-weight: bold; background: var(--error); border: 2px solid #ffffff11; }
-        #progress-bar { width: 0%; height: 6px; background: var(--primary); transition: width 1s; border-radius: 0 0 12px 12px; }
+        #memory-radar { padding: 12px; border-radius: 12px 12px 0 0; text-align: center; font-weight: bold; background: var(--error); border: 2px solid #ffffff11; transition: 0.3s; }
+        #progress-bar-bg { width: 100%; height: 6px; background: #334155; border-radius: 0 0 12px 12px; overflow: hidden; }
+        #progress-bar { width: 0%; height: 100%; background: var(--primary); transition: width 1s; }
 
         /* Chat Area */
-        #chat-container { width: 90%; max-width: 650px; height: 55vh; background: var(--card); border-radius: 20px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.6); border: 1px solid #334155; }
-        #log { flex-grow: 1; padding: 20px; overflow-y: auto; background: #0f172a; display: flex; flex-direction: column; gap: 10px; }
-        .msg { max-width: 85%; padding: 12px; border-radius: 15px; font-size: 0.95rem; }
-        .user { background: var(--primary); align-self: flex-end; }
-        .bot { background: #334155; align-self: flex-start; border: 1px solid #475569; }
-        .thought { font-style: italic; color: #94a3b8; font-size: 0.8rem; margin-bottom: 5px; }
+        #chat-container { width: 90%; max-width: 650px; height: 50vh; background: var(--card); border-radius: 20px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.6); border: 1px solid #334155; }
+        #log { flex-grow: 1; padding: 20px; overflow-y: auto; background: #0f172a; display: flex; flex-direction: column; gap: 10px; scroll-behavior: smooth; }
+        .msg { max-width: 85%; padding: 12px; border-radius: 15px; font-size: 0.95rem; line-height: 1.4; }
+        .user { background: var(--primary); align-self: flex-end; border-bottom-right-radius: 2px; }
+        .bot { background: #334155; align-self: flex-start; border: 1px solid #475569; border-bottom-left-radius: 2px; }
 
         /* Input Area */
         .input-area { padding: 15px; background: #1e293b; display: flex; gap: 8px; border-top: 1px solid #334155; }
-        input { flex-grow: 1; padding: 12px; border-radius: 10px; border: 1px solid #334155; background: #0f172a; color: white; }
+        input { flex-grow: 1; padding: 12px; border-radius: 10px; border: 1px solid #334155; background: #0f172a; color: white; outline: none; }
         button { background: var(--primary); color: white; border: none; padding: 0 15px; border-radius: 10px; cursor: pointer; font-weight: bold; transition: 0.2s; }
         button:hover { transform: scale(1.05); filter: brightness(1.2); }
 
         /* Command & Vault */
         .extra-panel { width: 90%; max-width: 650px; margin-top: 15px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .panel { background: #0f172a; border-radius: 15px; padding: 15px; border: 1px solid #334155; height: 180px; display: flex; flex-direction: column; }
-        .panel h4 { margin: 0 0 10px 0; color: var(--primary); font-size: 0.9rem; }
-        #vault-list, #cmd-history { flex-grow: 1; overflow-y: auto; font-family: monospace; font-size: 0.7rem; color: #94a3b8; }
+        .panel { background: #0f172a; border-radius: 15px; padding: 15px; border: 1px solid #334155; height: 200px; display: flex; flex-direction: column; }
+        .panel h4 { margin: 0 0 10px 0; color: var(--primary); font-size: 0.9rem; display: flex; justify-content: space-between; }
+        #vault-list, #cmd-history { flex-grow: 1; overflow-y: auto; font-family: 'Courier New', monospace; font-size: 0.75rem; color: #94a3b8; }
+        .sync-btn { font-size: 0.6rem; padding: 2px 5px; background: #334155; border-radius: 4px; cursor: pointer; }
     </style>
 </head>
 <body>
 
     <div id="status-box">
-        <div id="memory-radar">📡 INITIALIZING TEMB-BRAIN...</div>
-        <div id="progress-bar"></div>
+        <div id="memory-radar">🔍 SEARCHING FOR TEMB'S BRAIN...</div>
+        <div id="progress-bar-bg"><div id="progress-bar"></div></div>
     </div>
 
     <div id="chat-container">
-        <div id="log"><div class="msg bot"><b>Temb:</b> 555! Yo Temsin! System Online. Ready to build some TNT Cannons คับ!</div></div>
+        <div id="log">
+            <div class="msg bot"><b>Temb:</b> 555! Yo Temsin! Dashboard Loaded. Checking my knowledge file คับ...</div>
+        </div>
         <div class="input-area">
             <input type="text" id="userInput" placeholder="Talk to Temb..." onkeypress="if(event.key==='Enter') askTemb('chat')">
             <button onclick="askTemb('chat')">SEND</button>
@@ -51,14 +54,14 @@
 
     <div class="extra-panel">
         <div class="panel">
-            <h4>📁 KNOWLEDGE VAULT</h4>
-            <div id="vault-list">Waiting for sync...</div>
+            <h4>📁 KNOWLEDGE VAULT <span class="sync-btn" onclick="syncKnowledge()">FORCE SYNC</span></h4>
+            <div id="vault-list">Initializing...</div>
         </div>
         <div class="panel">
             <h4>🎮 COMMAND CENTER</h4>
-            <div id="cmd-history">> System idle.</div>
+            <div id="cmd-history">> Waiting for Temsin...</div>
             <div style="display:flex; gap:5px; margin-top:10px;">
-                <input type="text" id="cmdInput" style="padding:5px; font-size:0.7rem;" placeholder="Tell Temb what to do...">
+                <input type="text" id="cmdInput" style="padding:5px; font-size:0.7rem;" placeholder="Send Command...">
                 <button onclick="askTemb('command')" style="padding:0 10px; font-size:0.7rem;">EXEC</button>
             </div>
         </div>
@@ -66,23 +69,40 @@
 
     <script>
         let tembMemory = [];
-        const API_KEY = "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";
+        // Fixed: Added timestamp to prevent caching and tried absolute GitHub path
+        const JSON_URL = './knowledge.json';
+        const GITHUB_RAW = 'https://raw.githubusercontent.com/temsin2135/Temb-AI/main/knowledge.json';
 
         async function syncKnowledge() {
             const radar = document.getElementById('memory-radar');
             const vault = document.getElementById('vault-list');
             const bar = document.getElementById('progress-bar');
             
+            radar.innerText = "📡 SYNCING BRAIN...";
+            radar.style.background = "#3b82f6";
+
             try {
-                const res = await fetch('./knowledge.json?v=' + Date.now());
-                if (res.ok) {
-                    tembMemory = await res.json();
-                    radar.innerText = `✅ GENIUS MODE: ${tembMemory.length} ALGORITHMS LOADED`;
-                    radar.style.background = "#22c55e";
-                    bar.style.width = Math.min((tembMemory.length / 250) * 100, 100) + "%";
-                    vault.innerHTML = tembMemory.map(f => `<div>> ${f}</div>`).join('');
-                }
-            } catch (e) { radar.innerText = "⚠️ OFFLINE MODE"; }
+                // Try local first, then Github Raw
+                let response = await fetch(`${JSON_URL}?v=${Date.now()}`);
+                if (!response.ok) response = await fetch(`${GITHUB_RAW}?v=${Date.now()}`);
+                
+                if (response.ok) {
+                    tembMemory = await response.json();
+                    if (tembMemory.length > 5) {
+                        radar.innerText = `✅ GENIUS MODE: ${tembMemory.length} FACTS LOADED`;
+                        radar.style.background = "#22c55e";
+                        bar.style.width = "100%";
+                        vault.innerHTML = tembMemory.map(f => `<div>> ${f}</div>`).join('');
+                    } else {
+                        radar.innerText = "⚠️ BACKUP BRAIN LOADED (Low Facts)";
+                        radar.style.background = "#f59e0b";
+                    }
+                } else { throw new Error(); }
+            } catch (e) {
+                radar.innerText = "❌ ERROR: KNOWLEDGE.JSON NOT FOUND";
+                radar.style.background = "#ef4444";
+                vault.innerHTML = "<div>> Error: File missing in repo root.</div>";
+            }
         }
 
         syncKnowledge();
@@ -99,7 +119,7 @@
             if (mode === 'chat') {
                 log.innerHTML += `<div class="msg user"><b>You:</b> ${input}</div>`;
             } else {
-                cmdLog.innerHTML += `<div>> Running: ${input}</div>`;
+                cmdLog.innerHTML += `<div>[${new Date().toLocaleTimeString()}] > ${input}</div>`;
                 cmdLog.scrollTop = cmdLog.scrollHeight;
             }
             
@@ -107,21 +127,24 @@
             log.scrollTop = log.scrollHeight;
 
             try {
-                // 🧠 The "Thought" Logic: Temb picks facts based on keywords
-                const facts = tembMemory.filter(f => input.toLowerCase().split(' ').some(word => f.toLowerCase().includes(word)))
-                              .slice(0, 5).join(". ") || "Temsin is the creator.";
+                // Filter memory for relevant facts
+                const relevantFacts = tembMemory.filter(f => 
+                    input.toLowerCase().split(' ').some(word => f.toLowerCase().includes(word))
+                ).slice(0, 5).join(". ") || "Temsin is a Grade 8 Samsen student.";
 
                 const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
                     method: "POST",
-                    headers: { "Authorization": `Bearer ${API_KEY}`, "Content-Type": "application/json" },
+                    headers: { 
+                        "Authorization": `Bearer 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`, 
+                        "Content-Type": "application/json" 
+                    },
                     body: JSON.stringify({
                         "model": "google/gemini-2.0-flash-exp:free",
                         "messages": [
-                            {"role": "system", "content": `You are Temb, a witty Grade 8 student at Samsen School. You are a Redstone and Minecraft Algorithm expert. 
-                            PERSONALITY: Speak Thai mixed with English (Samsen Style). Use words like 'คับ', '555', 'ตึงจัด', 'พี่ชาย'. 
-                            THINKING: Always start your response with a short thought in brackets like [Thinking: analyzing redstone ticks...]. 
-                            DATA: Use these facts: ${facts}. If a command is given, confirm you are executing it.`},
-                            {"role": "user", "content": mode === 'command' ? `COMMAND: ${input}` : input}
+                            {"role": "system", "content": `You are Temb, a witty Grade 8 student at Samsen School. Expert in Redstone & Minecraft. 
+                            PERSONALITY: Speak Thai-English mixed. Use 'คับ', '555', 'ตึงจัด'. Always start with a [Thinking: ...] tag.
+                            CONTEXT: ${relevantFacts}`},
+                            {"role": "user", "content": mode === 'command' ? `SYSTEM COMMAND: ${input}` : input}
                         ]
                     })
                 });
@@ -129,12 +152,10 @@
                 const data = await response.json();
                 const reply = data.choices[0].message.content;
                 
-                if (mode === 'chat') {
-                    log.innerHTML += `<div class="msg bot"><b>Temb:</b> ${reply}</div>`;
-                } else {
-                    log.innerHTML += `<div class="msg bot"><small><i>(Command Output)</i></small><br>${reply}</div>`;
-                }
-            } catch (err) { log.innerHTML += `<div class="msg bot" style="color:red;">Error! Brain disconnected.</div>`; }
+                log.innerHTML += `<div class="msg bot"><b>Temb:</b> ${reply}</div>`;
+            } catch (err) { 
+                log.innerHTML += `<div class="msg bot" style="color:var(--error);"><b>Error:</b> API connection failed คับ!</div>`; 
+            }
             log.scrollTop = log.scrollHeight;
         }
     </script>
