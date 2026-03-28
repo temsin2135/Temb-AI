@@ -1,10 +1,11 @@
 name: Temb Auto-Update
+
 on:
   schedule:
     - cron: '0 0 * * *'
   workflow_dispatch:
 
-# 🚀 ADD THIS LINE TO FIX THE CANCELLED ERROR:
+# 🚀 This stops the "Cancelled after 13s" error
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -12,4 +13,46 @@ concurrency:
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
-# ... rest of your code ...
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Run Scraper
+        run: |
+          python -c "
+          import requests, json
+          try:
+              print('📡 Fetching Minecraft 1.21 Data...')
+              url = 'https://raw.githubusercontent.com/PrismarineJS/minecraft-data/master/data/pc/1.21/items.json'
+              items = requests.get(url).json()
+              knowledge = [f'The item {i[\"displayName\"]} has the ID {i[\"name\"]}.' for i in items[:150]]
+              knowledge.append('Temsin is a Grade 8 student at Samsen School.')
+              with open('knowledge.json', 'w') as f:
+                  json.dump(knowledge, f)
+              print('✅ knowledge.json updated!')
+          except Exception as e:
+              print(f'❌ Error: {e}')
+          "
+
+      - name: Commit and Push
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add knowledge.json
+          git commit -m "Auto-Update: Temb learned Minecraft Wiki! 555" || echo "No changes"
+          git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }} main
