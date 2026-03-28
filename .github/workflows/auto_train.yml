@@ -5,16 +5,18 @@ on:
   workflow_dispatch:
 
 env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true # Stops the Node.js 20 warnings!
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true 
 
 jobs:
   build:
     runs-on: ubuntu-latest
     permissions:
-      contents: write # IMPORTANT: Gives Temb permission to save the file
+      contents: write 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }} # The ID Card!
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -46,6 +48,6 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add knowledge.json
-          # This line prevents the 'Exit Code 1' if nothing changed
           git commit -m "Auto-Update: Temb learned Minecraft Wiki! 555" || echo "No changes to commit"
-          git push origin main
+          # Using the token directly in the push URL to kill Error 128
+          git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git main
