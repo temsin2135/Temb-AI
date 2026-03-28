@@ -3,8 +3,7 @@ name: Temb Auto-Update
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 0 * * *'
-
+    - cron: '0 * * * *'  # 🚀 This means: "Run at minute 0 of every hour"
 jobs:
   build:
     runs-on: ubuntu-latest
