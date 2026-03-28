@@ -6,76 +6,39 @@
     <style>
         body { background: #0f172a; color: #f8fafc; font-family: 'Segoe UI', Tahoma, sans-serif; padding: 20px; text-align: center; }
         #chat-container { max-width: 500px; margin: auto; background: #1e293b; border-radius: 15px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); border: 1px solid #334155; }
-        #log { height: 400px; overflow-y: auto; text-align: left; margin-bottom: 15px; padding-right: 10px; }
-        .msg { margin-bottom: 10px; padding: 8px 12px; border-radius: 10px; line-height: 1.4; }
-        .user { background: #3b82f6; color: white; align-self: flex-end; margin-left: 20%; }
-        .bot { background: #334155; color: #f1f5f9; margin-right: 20%; }
+        
+        /* 🧠 Memory Radar Style */
+        #memory-radar { 
+            background: #0ea5e9; 
+            color: white; 
+            padding: 10px; 
+            border-radius: 10px; 
+            margin-bottom: 15px; 
+            font-size: 0.9em;
+            font-weight: bold;
+            border-bottom: 3px solid #0284c7;
+        }
+
+        #log { height: 350px; overflow-y: auto; text-align: left; margin-bottom: 15px; padding-right: 10px; }
+        .msg { margin-bottom: 10px; padding: 8px 12px; border-radius: 10px; line-height: 1.4; position: relative; }
+        .user { background: #3b82f6; color: white; margin-left: 20%; border-bottom-right-radius: 2px; }
+        .bot { background: #334155; color: #f1f5f9; margin-right: 20%; border-bottom-left-radius: 2px; border: 1px solid #475569; }
         .input-area { display: flex; gap: 10px; }
-        input { flex-grow: 1; padding: 12px; border-radius: 8px; border: none; background: #0f172a; color: white; outline: none; }
-        button { padding: 10px 20px; background: #3b82f6; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
-        button:hover { background: #2563eb; }
+        input { flex-grow: 1; padding: 12px; border-radius: 8px; border: none; background: #0f172a; color: white; outline: none; border: 1px solid #334155; }
+        button { padding: 10px 20px; background: #3b82f6; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        button:hover { background: #2563eb; transform: scale(1.05); }
     </style>
 </head>
 <body>
+
     <div id="chat-container">
+        <div id="memory-radar">📡 Temb is checking his brain...</div>
+        
         <h2>🧠 Temb-GPT Ultra</h2>
+        
         <div id="log">
-            <div class="msg bot">Temb: 555! Yo Temsin! I'm officially online. What's the plan for the Orbital Cannon or Samsen homework?</div>
+            <div class="msg bot"><b>Temb:</b> 555! Yo Temsin! I'm officially online. What's the plan for the Orbital Cannon or Samsen homework?</div>
         </div>
+        
         <div class="input-area">
-            <input type="text" id="userInput" placeholder="Ask Temb anything..." onkeypress="if(event.key==='Enter') askTemb()">
-            <button onclick="askTemb()">Send</button>
-        </div>
-    </div>
-
-    <script>
-        async function askTemb() {
-            const inputField = document.getElementById('userInput');
-            const input = inputField.value.trim();
-            if (!input) return;
-
-            const log = document.getElementById('log');
-            log.innerHTML += `<div class="msg user"><b>You:</b> ${input}</div>`;
-            inputField.value = "";
-            log.scrollTop = log.scrollHeight;
-
-            try {
-                // 1. Optional: Try to fetch the knowledge.json from your Colab
-                let facts = "User is Temsin, Grade 8 student at Samsen School.";
-                try {
-                    const memoryRes = await fetch('knowledge.json');
-                    if (memoryRes.ok) {
-                        const memory = await memoryRes.json();
-                        facts += " Recent knowledge: " + memory.slice(-5).join(", ");
-                    }
-                } catch (e) { console.log("No knowledge.json found yet, using default."); }
-
-                // 2. Talk to the Smart Brain (OpenRouter)
-                const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-                    method: "POST",
-                    headers: {
-                        "Authorization": "Bearer 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",
-                        "Content-Type": "application/json",
-                        "HTTP-Referer": "https://github.com/temsin2135/Temb-AI", 
-                        "X-Title": "Temb AI"
-                    },
-                    body: JSON.stringify({
-                        "model": "google/gemini-2.0-flash-exp:free",
-                        "messages": [
-                            {"role": "system", "content": `You are Temb, a witty AI best friend for Temsin (Grade 8, Samsen School). Facts: ${facts}. Be cool, slightly sarcastic/witty, and say 555! like a Thai student.`},
-                            {"role": "user", "content": input}
-                        ]
-                    })
-                });
-
-                const data = await response.json();
-                const reply = data.choices[0].message.content;
-                log.innerHTML += `<div class="msg bot"><b>Temb:</b> ${reply}</div>`;
-            } catch (err) {
-                log.innerHTML += `<div class="msg bot" style="color:red;"><b>Error:</b> Temb's brain is fuzzy. Check your API key!</div>`;
-            }
-            log.scrollTop = log.scrollHeight;
-        }
-    </script>
-</body>
-</html>
+            <input type="text" id="userInput" placeholder="Ask Temb anything..." onkeypress="
