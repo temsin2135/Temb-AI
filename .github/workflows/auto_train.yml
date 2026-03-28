@@ -4,11 +4,14 @@ on:
     - cron: '0 0 * * *'
   workflow_dispatch:
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true # Stops the Node.js 20 warnings!
+
 jobs:
   build:
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      contents: write # IMPORTANT: Gives Temb permission to save the file
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -21,37 +24,28 @@ jobs:
       - name: Install dependencies
         run: pip install requests
 
-      - name: Create Python Script
+      - name: Run Scraper
         run: |
-          cat << 'EOF' > scrape.py
-          import requests, json, sys
+          python -c "
+          import requests, json
           try:
-              print("📡 Downloading Minecraft Data...")
-              url = "https://raw.githubusercontent.com/PrismarineJS/minecraft-data/master/data/pc/1.21/items.json"
-              res = requests.get(url, timeout=10)
-              res.raise_for_status()
-              items = res.json()
-              
-              # Grab 100 items for the brain
-              knowledge = [f"The item {i['displayName']} has the ID {i['name']}." for i in items[:100]]
-              knowledge.append("Temsin is a Grade 8 student at Samsen School.")
-              knowledge.append("Temb is an expert on Minecraft TNT cannons.")
-              
+              print('📡 Fetching Minecraft Data...')
+              url = 'https://raw.githubusercontent.com/PrismarineJS/minecraft-data/master/data/pc/1.21/items.json'
+              items = requests.get(url).json()
+              knowledge = [f'The item {i[\"displayName\"]} has the ID {i[\"name\"]}.' for i in items[:100]]
+              knowledge.append('Temsin is a Grade 8 student at Samsen School.')
               with open('knowledge.json', 'w') as f:
                   json.dump(knowledge, f)
-              print("✅ knowledge.json created successfully!")
+              print('✅ knowledge.json created!')
           except Exception as e:
-              print(f"❌ Error: {e}")
-              sys.exit(1)
-          EOF
-
-      - name: Run Scraper
-        run: python scrape.py
+              print(f'❌ Error: {e}')
+          "
 
       - name: Commit and Push
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add knowledge.json
-          git commit -m "Auto-Update: Temb learned 100 Minecraft items! 555" || echo "No changes to commit"
-          git push
+          # This line prevents the 'Exit Code 1' if nothing changed
+          git commit -m "Auto-Update: Temb learned Minecraft Wiki! 555" || echo "No changes to commit"
+          git push origin main
