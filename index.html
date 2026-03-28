@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Temb AI Chat</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+</head>
+<body style="background:#1a1a1a; color:white; text-align:center; font-family:sans-serif;">
+    <h1>🧠 Temb AI (Mobile)</h1>
+    <div id="status">Loading...</div>
+    <div style="background:#333; padding:20px; border-radius:10px; display:inline-block;">
+        <p id="output">Ask me 'who' or 'hi'!</p>
+        <input type="text" id="input" placeholder="Type here...">
+        <button onclick="chat()">Send</button>
+    </div>
+    <script>
+        let model, dict;
+        async function start() {
+            dict = await (await fetch('tokenizer_data.json')).json();
+            model = await tf.loadLayersModel('model.json');
+            document.getElementById('status').innerText = "✅ ONLINE";
+        }
+        async function chat() {
+            let val = document.getElementById('input').value.toLowerCase();
+            let id = dict.wordToId[val];
+            if (id === undefined) { document.getElementById('output').innerText = "Temb: ...?"; return; }
+            let prediction = model.predict(tf.tensor2d([id], [1, 1]));
+            let result = await prediction.argMax(1).data();
+            document.getElementById('output').innerText = "Temb: " + dict.idToWord[result[0]];
+        }
+        start();
+    </script>
+</body>
+</html>
