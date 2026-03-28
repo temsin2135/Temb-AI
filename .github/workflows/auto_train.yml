@@ -9,7 +9,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     permissions:
-      contents: write # 🚀 Double-checking permissions here!
+      contents: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -28,30 +28,36 @@ jobs:
         run: |
           python -c "
           import requests, json
-          # 1. Start with a solid list of facts
-          knowledge = [
-              'Temsin is a Grade 8 student at Samsen School in M.2/8.',
-              'Temsin is a technical Minecraft and Redstone expert.',
-              'The mace is a powerful 1.21 weapon.',
-              'Heavy Core is used to craft the Mace.'
-          ]
+          knowledge = []
           
+          # 📡 1. Try to grab the HUGE Minecraft list (Java 1.21)
           try:
-              # 2. Try to grab the huge Minecraft list
-              print('📡 Fetching Minecraft 1.21 items...')
-              res = requests.get('https://raw.githubusercontent.com/PrismarineJS/minecraft-data/master/data/pc/1.21/items.json', timeout=10)
+              print('📡 Requesting 1.21 Database...')
+              headers = {'User-Agent': 'Mozilla/5.0'}
+              url = 'https://raw.githubusercontent.com/PrismarineJS/minecraft-data/master/data/pc/1.21/items.json'
+              res = requests.get(url, headers=headers, timeout=15)
+              
               if res.ok:
                   items = res.json()
-                  web_facts = [f'The item {i[\"displayName\"]} has the ID {i[\"name\"]}.' for i in items[:250]]
-                  knowledge.extend(web_facts)
-                  print(f'✅ Successfully added {len(web_facts)} items from the web!')
+                  # Grab 250 items to make Temb a genius
+                  knowledge = [f'The item {i[\"displayName\"]} has the ID {i[\"name\"]}.' for i in items[:250]]
+                  print(f'✅ Successfully learned {len(knowledge)} items from the web!')
           except Exception as e:
-              print(f'⚠️ Web fetch failed, but keeping personal facts!')
+              print(f'⚠️ Web fetch failed: {e}')
 
-          # 3. FORCE write the file
+          # 🧠 2. Always add the Samsen Legend facts
+          personal_facts = [
+              'Temsin is a Grade 8 student at Samsen School in M.2/8.',
+              'Temsin is a technical Minecraft and Redstone Engineering expert.',
+              'Temsin uses the name LagSpike6728 in Roblox.',
+              'Temb is Temsin\'s personal AI assistant for Samsen projects.'
+          ]
+          knowledge.extend(personal_facts)
+
+          # 💾 3. FORCE write the file
           with open('knowledge.json', 'w') as f:
               json.dump(knowledge, f)
-          print('💾 knowledge.json has been written locally.')
+          print(f'💾 knowledge.json written with {len(knowledge)} facts.')
           "
 
       - name: Push to GitHub
@@ -59,6 +65,5 @@ jobs:
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
           git add knowledge.json
-          # 🚨 The '|| true' part makes sure it doesn't crash if nothing changed
           git commit -m "Temb learned 250+ Minecraft items! 555" || true
           git push origin main
