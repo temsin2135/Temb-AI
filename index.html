@@ -17,6 +17,7 @@
             font-size: 0.9em;
             font-weight: bold;
             border-bottom: 3px solid #0284c7;
+            transition: 0.5s;
         }
 
         #log { height: 350px; overflow-y: auto; text-align: left; margin-bottom: 15px; padding-right: 10px; }
@@ -41,4 +42,47 @@
         </div>
         
         <div class="input-area">
-            <input type="text" id="userInput" placeholder="Ask Temb anything..." onkeypress="
+            <input type="text" id="userInput" placeholder="Ask Temb anything..." onkeypress="if(event.key==='Enter') askTemb()">
+            <button onclick="askTemb()">Send</button>
+        </div>
+    </div>
+
+    <script>
+        let tembMemory = [];
+
+        // 🚀 THE SUPER LINK: This forces GitHub to send the newest data
+        async function syncKnowledge() {
+            const radar = document.getElementById('memory-radar');
+            try {
+                // Change 'temsin2135' if your username is different!
+                const rawUrl = 'https://raw.githubusercontent.com/temsin2135/Temb-AI/main/knowledge.json?v=' + Date.now();
+                
+                const res = await fetch(rawUrl);
+                if (res.ok) {
+                    tembMemory = await res.json();
+                    radar.innerText = `✅ Temb Brain Active: ${tembMemory.length} Facts Learned!`;
+                    radar.style.background = "#22c55e"; // Success Green
+                } else {
+                    radar.innerText = "⚠️ Memory file empty. Running Scraper...";
+                }
+            } catch (e) {
+                radar.innerText = "📡 Offline Mode: Using built-in logic.";
+                console.log("Memory error:", e);
+            }
+        }
+
+        syncKnowledge();
+
+        async function askTemb() {
+            const inputField = document.getElementById('userInput');
+            const input = inputField.value.trim();
+            if (!input) return;
+
+            const log = document.getElementById('log');
+            log.innerHTML += `<div class="msg user"><b>You:</b> ${input}</div>`;
+            inputField.value = "";
+            log.scrollTop = log.scrollHeight;
+
+            try {
+                // Grab some facts for context
+                const randomFacts = temb
