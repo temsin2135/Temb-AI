@@ -4,52 +4,12 @@ on:
     - cron: '0 0 * * *'
   workflow_dispatch:
 
-# 🚀 2026 FIX: This kills the Node.js 20 warnings!
+# 🚀 ADD THIS LINE TO FIX THE CANCELLED ERROR:
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write # 🧠 Essential permission
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          persist-credentials: false # 🛡️ We will use the token manually
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-
-      - name: Install dependencies
-        run: pip install requests
-
-      - name: Run Scraper
-        run: |
-          python -c "
-          import requests, json
-          try:
-              print('📡 Downloading Minecraft 1.21 items...')
-              url = 'https://raw.githubusercontent.com/PrismarineJS/minecraft-data/master/data/pc/1.21/items.json'
-              items = requests.get(url).json()
-              knowledge = [f'The item {i[\"displayName\"]} has the ID {i[\"name\"]}.' for i in items[:150]]
-              knowledge.append('Temsin is a Grade 8 student at Samsen School.')
-              knowledge.append('Temsin is an expert in Redstone and LifeSteal SMP.')
-              with open('knowledge.json', 'w') as f:
-                  json.dump(knowledge, f)
-              print('✅ knowledge.json is ready!')
-          except Exception as e:
-              print(f'❌ Scraper Error: {e}')
-          "
-
-      - name: Commit and Push
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add knowledge.json
-          git commit -m "Auto-Update: Temb learned Minecraft Wiki! 555" || echo "No changes"
-          # 🔑 THE SECRET KEY: This forces the push using the internal token
-          git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git main
+# ... rest of your code ...
